@@ -7,16 +7,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bridge: {
+        'bridge': {
+          primary: '#fbbf24',
+          secondary: '#f59e0b',
+          accent: '#047857',
           dark: '#0c1445',
-          blue: '#1e3a8a',
-          amber: '#fbbf24',
-          orange: '#f59e0b',
-          emerald: '#047857',
+          'dark-light': '#1e3a8a',
+          'dark-lighter': '#1e40af',
         }
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
+        'inter': ['Inter', 'sans-serif'],
       },
       animation: {
         'neural-pulse': 'neuralPulse 2s ease-in-out infinite',
