@@ -1,249 +1,346 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-
-// Components
-import ProgressBar from '../components/training/ProgressBar';
-import CalibrationScreen from '../components/training/CalibrationScreen';
-import ScenarioSelection from '../components/training/ScenarioSelection';
-import BCITraining from '../components/training/BCITraining';
-import ResultsAnalysis from '../components/training/ResultsAnalysis';
-import WelcomeScreen from '../components/training/WelcomeScreen';
-
-// Hooks and services
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useBCI } from '../hooks/useBCI';
-import { useTraining } from '../hooks/useTraining';
+import { trackEvent } from '../services/analytics';
 
-// Types
-export interface TrainingStep {
-  id: number;
-  title: string;
-  icon: string;
-  completed: boolean;
-}
-
-export interface TrainingConfig {
-  scenario: 'family' | 'relationship' | 'workplace';
-  partnerStyle: 'emotional' | 'direct' | 'passive-aggressive' | 'logical';
-  trainingGoal: 'stress-reduction' | 'empathy-boost' | 'emotional-regulation' | 'active-listening';
-}
-
-export interface TrainingData {
-  stress: number;
-  empathy: number;
-  regulation: number;
-  pathways: number;
-  exchanges: number;
-}
+// Import our new components
+import BCIMetrics from '../components/training/BCIMetrics';
+import TrainingProgress from '../components/training/TrainingProgress';
+import NeuralFeedbackPanel from '../components/training/NeuralFeedbackPanel';
 
 const TrainingPage: React.FC = () => {
-  const navigate = useNavigate();
-  const { isConnected, metrics, connectBCI } = useBCI();
-  const { 
-    currentSession, 
-    startSession, 
-    updateSession, 
-    completeSession 
-  } = useTraining();
+  const { isConnected, isCalibrating, connect, startCalibration } = useBCI();
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isTrainingActive, setIsTrainingActive] = useState(false);
 
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isCalibrated, setIsCalibrated] = useState(false);
-  const [trainingConfig, setTrainingConfig] = useState<TrainingConfig>({
-    scenario: 'relationship',
-    partnerStyle: 'emotional',
-    trainingGoal: 'empathy-boost',
-  });
-  const [trainingData, setTrainingData] = useState<TrainingData>({
-    stress: 45,
-    empathy: 65,
-    regulation: 78,
-    pathways: 0,
-    exchanges: 0,
-  });
-
-  const steps: TrainingStep[] = [
-    { id: 1, title: 'Neural Calibration', icon: '🔬', completed: false },
-    { id: 2, title: 'Choose Scenario', icon: '🎯', completed: false },
-    { id: 3, title: 'BCI Training', icon: '⚡', completed: false },
-    { id: 4, title: 'Analysis', icon: '📊', completed: false },
-  ];
-
-  const [stepStates, setStepStates] = useState(steps);
-
-  useEffect(() => {
-    // Update step completion status
-    setStepStates(prev => prev.map((step, index) => ({
-      ...step,
-      completed: index < currentStep,
-    })));
-  }, [currentStep]);
-
-  const handleStepComplete = (step: number) => {
-    if (step === 1 && !isCalibrated) {
-      setIsCalibrated(true);
-    }
-    
-    if (step < 4) {
-      setCurrentStep(step + 1);
+  const handleConnectBCI = async () => {
+    trackEvent('bci_connect_attempt', { page: 'training' });
+    try {
+      await connect();
+      trackEvent('bci_connect_success', { page: 'training' });
+    } catch (error) {
+      trackEvent('bci_connect_error', { page: 'training', error: String(error) });
     }
   };
 
-  const handleCalibrationComplete = () => {
-    setIsCalibrated(true);
-    handleStepComplete(1);
+  const handleStartCalibration = async () => {
+    trackEvent('calibration_start', { step: currentStep });
+    try {
+      await startCalibration();
+      setCurrentStep(2);
+      trackEvent('calibration_complete', { step: currentStep });
+    } catch (error) {
+      trackEvent('calibration_error', { step: currentStep, error: String(error) });
+    }
   };
 
-  const handleScenarioComplete = (config: TrainingConfig) => {
-    setTrainingConfig(config);
-    handleStepComplete(2);
+  const handleStartTraining = () => {
+    setIsTrainingActive(true);
+    setCurrentStep(3);
+    trackEvent('training_start', { step: currentStep });
   };
 
-  const handleTrainingComplete = (data: TrainingData) => {
-    setTrainingData(data);
-    handleStepComplete(3);
-  };
-
-  const handleStartOver = () => {
-    setCurrentStep(1);
-    setIsCalibrated(false);
-    setTrainingData({
-      stress: 45,
-      empathy: 65,
-      regulation: 78,
-      pathways: 0,
-      exchanges: 0,
-    });
-  };
-
-  const handleGoHome = () => {
-    navigate('/');
-  };
-
-  const renderCurrentScreen = () => {
-    switch (currentStep) {
-      case 0:
-        return (
-          <WelcomeScreen
-            onStart={() => setCurrentStep(1)}
-            onGoHome={handleGoHome}
-          />
-        );
-      case 1:
-        return (
-          <CalibrationScreen
-            isConnected={isConnected}
-            metrics={metrics}
-            onCalibrationComplete={handleCalibrationComplete}
-            onConnect={connectBCI}
-          />
-        );
-      case 2:
-        return (
-          <ScenarioSelection
-            config={trainingConfig}
-            onConfigChange={setTrainingConfig}
-            onComplete={handleScenarioComplete}
-            neuralProfile={{
-              stress: metrics.stress,
-              focus: metrics.focus,
-              empathy: metrics.empathy,
-            }}
-          />
-        );
-      case 3:
-        return (
-          <BCITraining
-            config={trainingConfig}
-            metrics={metrics}
-            onDataUpdate={setTrainingData}
-            onComplete={handleTrainingComplete}
-            trainingData={trainingData}
-          />
-        );
-      case 4:
-        return (
-          <ResultsAnalysis
-            trainingData={trainingData}
-            config={trainingConfig}
-            onStartNew={handleStartOver}
-            onGoHome={handleGoHome}
-          />
-        );
-      default:
-        return null;
+  const handleStepClick = (step: number) => {
+    if (step <= currentStep || isConnected) {
+      setCurrentStep(step);
+      trackEvent('step_navigation', { from_step: currentStep, to_step: step });
     }
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative"
-    >
-      {/* Starry background effect */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,_#fbbf24_1px,_transparent_2px),radial-gradient(circle_at_80%_20%,_#f59e0b_1px,_transparent_2px),radial-gradient(circle_at_60%_80%,_#fbbf24_1px,_transparent_2px)] bg-[length:200px_200px,250px_250px,180px_180px] animate-pulse opacity-80" />
-      </div>
+    <div className="min-h-screen pt-20">
+      {/* Training Progress */}
+      <TrainingProgress
+        currentStep={currentStep}
+        totalSteps={4}
+        onStepClick={handleStepClick}
+      />
 
-      {/* Main container */}
-      <div className="relative z-10 max-w-6xl mx-auto min-h-screen bg-slate-900/15 backdrop-blur-xl border-l border-r border-amber-400/20">
-        {/* Header */}
-        <header className="bg-slate-900/90 backdrop-blur-sm border-b border-amber-400/30 px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-slate-100 mb-4">
+              Neural Communication Training
+            </h1>
+            <p className="text-xl text-slate-300">
+              Real-time BCI feedback for enhanced communication skills
+            </p>
+          </div>
+
+          {/* Main Training Interface */}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column - BCI Metrics */}
+            <div className="space-y-6">
+              <BCIMetrics size="large" />
+              
+              {/* BCI Connection Panel */}
               <motion.div
-                whileHover={{ scale: 1.05 }}
-                onClick={handleGoHome}
-                className="cursor-pointer flex items-center space-x-3"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="bg-slate-800/50 backdrop-blur-sm border border-amber-400/20 rounded-xl p-6"
               >
-                <div className="w-10 h-10 bg-gradient-to-r from-amber-400 to-orange-500 rounded-xl flex items-center justify-center">
-                  <span className="text-slate-900 font-bold text-lg">B</span>
+                <h3 className="text-lg font-semibold text-amber-400 mb-4">
+                  🔌 BCI Connection
+                </h3>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-300">Status:</span>
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
+                      <span className={isConnected ? 'text-green-400' : 'text-red-400'}>
+                        {isConnected ? 'Connected' : 'Disconnected'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {!isConnected ? (
+                    <button
+                      onClick={handleConnectBCI}
+                      className="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 py-3 rounded-lg font-semibold hover:scale-105 transition-transform duration-200"
+                    >
+                      🧠 Connect BCI Device
+                    </button>
+                  ) : (
+                    <div className="space-y-3">
+                      {currentStep === 1 && (
+                        <button
+                          onClick={handleStartCalibration}
+                          disabled={isCalibrating}
+                          className="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 py-3 rounded-lg font-semibold hover:scale-105 transition-transform duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isCalibrating ? '🔄 Calibrating...' : '🔬 Start Calibration'}
+                        </button>
+                      )}
+                      
+                      {currentStep >= 2 && (
+                        <button
+                          onClick={handleStartTraining}
+                          className="w-full bg-gradient-to-r from-blue-400 to-blue-500 text-slate-900 py-3 rounded-lg font-semibold hover:scale-105 transition-transform duration-200"
+                        >
+                          ⚡ {isTrainingActive ? 'Training Active' : 'Start Training'}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-                <span className="text-2xl font-bold text-amber-400">Bridge</span>
               </motion.div>
-              <div className="bg-amber-400/20 text-amber-400 px-3 py-1 rounded-full text-sm border border-amber-400/30">
-                AI+BCI Neural Communication
-              </div>
             </div>
-            
-            <div className="flex items-center space-x-2 bg-amber-400/10 rounded-full px-4 py-2 border border-amber-400/30">
-              <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse" />
-              <span className="text-amber-400 text-sm font-medium">
-                {currentStep === 0 ? 'Ready to Begin' : 
-                 currentStep === 1 ? 'Neural Calibration' :
-                 currentStep === 2 ? 'Choose Scenario' :
-                 currentStep === 3 ? 'BCI Training' : 'Analysis Complete'}
-              </span>
+
+            {/* Center Column - Training Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Current Step Content */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="bg-slate-800/50 backdrop-blur-sm border border-amber-400/20 rounded-xl p-8"
+              >
+                {currentStep === 1 && (
+                  <div className="text-center">
+                    <div className="text-6xl mb-6">🔬</div>
+                    <h2 className="text-2xl font-bold text-amber-400 mb-4">
+                      Step 1: Neural Calibration
+                    </h2>
+                    <p className="text-slate-300 mb-6">
+                      Establish your personal brain baseline for optimal training effectiveness.
+                      This ensures the AI provides personalized feedback based on YOUR unique neural patterns.
+                    </p>
+                    {!isConnected ? (
+                      <p className="text-orange-400">
+                        Please connect your BCI device first to begin calibration.
+                      </p>
+                    ) : (
+                      <p className="text-green-400">
+                        ✅ BCI connected! Ready for neural calibration.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {currentStep === 2 && (
+                  <div className="text-center">
+                    <div className="text-6xl mb-6">🎯</div>
+                    <h2 className="text-2xl font-bold text-amber-400 mb-4">
+                      Step 2: Choose Your Scenario
+                    </h2>
+                    <p className="text-slate-300 mb-6">
+                      Select the type of communication challenge you want to practice.
+                      Our AI will create a personalized training experience based on your choice.
+                    </p>
+                    
+                    {/* Scenario Selection */}
+                    <div className="grid md:grid-cols-3 gap-4 mt-8">
+                      {[
+                        { id: 'relationship', emoji: '💔', title: 'Romantic Relationship', desc: 'Practice emotional communication' },
+                        { id: 'workplace', emoji: '💼', title: 'Workplace Tension', desc: 'Professional conflict resolution' },
+                        { id: 'family', emoji: '👨‍👩‍👧‍👦', title: 'Family Dynamics', desc: 'Generational understanding' }
+                      ].map((scenario) => (
+                        <button
+                          key={scenario.id}
+                          onClick={() => handleStartTraining()}
+                          className="p-4 bg-slate-700/50 border border-amber-400/30 rounded-lg hover:border-amber-400 hover:bg-amber-400/10 transition-colors duration-200 text-left"
+                        >
+                          <div className="text-3xl mb-2">{scenario.emoji}</div>
+                          <div className="font-semibold text-amber-400 mb-1">{scenario.title}</div>
+                          <div className="text-sm text-slate-400">{scenario.desc}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {currentStep === 3 && (
+                  <div className="text-center">
+                    <div className="text-6xl mb-6">⚡</div>
+                    <h2 className="text-2xl font-bold text-amber-400 mb-4">
+                      Step 3: Live BCI Training
+                    </h2>
+                    <p className="text-slate-300 mb-6">
+                      Engage in real-time conversation training with neural feedback.
+                      Watch your brain metrics and receive guidance for optimal communication.
+                    </p>
+                    
+                    {isTrainingActive ? (
+                      <div className="space-y-4">
+                        <div className="bg-emerald-500/20 border border-emerald-500/50 rounded-lg p-4">
+                          <p className="text-emerald-400 font-semibold">🧠 Training Session Active</p>
+                          <p className="text-slate-300 text-sm mt-2">
+                            Monitor your neural feedback panel for real-time insights
+                          </p>
+                        </div>
+                        
+                        <button
+                          onClick={() => {
+                            setCurrentStep(4);
+                            setIsTrainingActive(false);
+                            trackEvent('training_complete', { step: currentStep });
+                          }}
+                          className="bg-gradient-to-r from-purple-400 to-purple-500 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-transform duration-200"
+                        >
+                          📊 Complete Training & View Results
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="text-slate-400">
+                        Click "Start Training" to begin your neural communication session.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {currentStep === 4 && (
+                  <div className="text-center">
+                    <div className="text-6xl mb-6">📊</div>
+                    <h2 className="text-2xl font-bold text-amber-400 mb-4">
+                      Step 4: Neural Analysis Complete
+                    </h2>
+                    <p className="text-slate-300 mb-6">
+                      Your communication neural pathways have been enhanced through BCI-guided practice!
+                    </p>
+                    
+                    {/* Results Grid */}
+                    <div className="grid md:grid-cols-2 gap-4 mt-8 mb-8">
+                      {[
+                        { label: 'Neural Connections', value: '+47', color: 'text-amber-400' },
+                        { label: 'Stress Reduction', value: '-67%', color: 'text-green-400' },
+                        { label: 'Empathy Increase', value: '+96%', color: 'text-blue-400' },
+                        { label: 'BCI Performance', value: 'A+', color: 'text-purple-400' }
+                      ].map((result, index) => (
+                        <div key={index} className="bg-slate-700/50 border border-slate-600 rounded-lg p-4">
+                          <div className={`text-2xl font-bold ${result.color} mb-1`}>
+                            {result.value}
+                          </div>
+                          <div className="text-sm text-slate-400">{result.label}</div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="space-x-4">
+                      <button
+                        onClick={() => {
+                          setCurrentStep(2);
+                          setIsTrainingActive(false);
+                          trackEvent('training_restart', { from_step: 4 });
+                        }}
+                        className="bg-gradient-to-r from-amber-400 to-orange-500 text-slate-900 px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-transform duration-200"
+                      >
+                        🔄 Train Another Scenario
+                      </button>
+                      
+                      <a
+                        href="/demo.html"
+                        className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:scale-105 transition-transform duration-200"
+                      >
+                        🎮 Try Full Demo
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+
+              {/* Neural Feedback Panel */}
+              <NeuralFeedbackPanel />
             </div>
           </div>
-        </header>
 
-        {/* Progress Bar */}
-        {currentStep > 0 && (
-          <ProgressBar 
-            steps={stepStates}
-            currentStep={currentStep}
-          />
-        )}
+          {/* Quick Actions */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-12 text-center"
+          >
+            <div className="grid md:grid-cols-3 gap-6">
+              <a
+                href="/demo.html"
+                className="block bg-gradient-to-br from-amber-400/20 to-orange-500/20 border border-amber-400/30 rounded-xl p-6 hover:border-amber-400/50 transition-colors duration-200 group"
+              >
+                <div className="text-3xl mb-4">🧠</div>
+                <h3 className="text-lg font-bold text-amber-400 mb-2 group-hover:text-amber-300">
+                  Full Interactive Demo
+                </h3>
+                <p className="text-slate-300 text-sm">
+                  Experience the complete 4-step neural training journey
+                </p>
+              </a>
 
-        {/* Main Content */}
-        <main className="flex-1">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentStep}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              {renderCurrentScreen()}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+              <a
+                href="/dashboard"
+                className="block bg-gradient-to-br from-blue-400/20 to-purple-500/20 border border-blue-400/30 rounded-xl p-6 hover:border-blue-400/50 transition-colors duration-200 group"
+              >
+                <div className="text-3xl mb-4">📊</div>
+                <h3 className="text-lg font-bold text-blue-400 mb-2 group-hover:text-blue-300">
+                  View Dashboard
+                </h3>
+                <p className="text-slate-300 text-sm">
+                  Monitor your progress and neural development
+                </p>
+              </a>
+
+              <a
+                href="/"
+                className="block bg-gradient-to-br from-emerald-400/20 to-emerald-500/20 border border-emerald-400/30 rounded-xl p-6 hover:border-emerald-400/50 transition-colors duration-200 group"
+              >
+                <div className="text-3xl mb-4">🏠</div>
+                <h3 className="text-lg font-bold text-emerald-400 mb-2 group-hover:text-emerald-300">
+                  Back to Home
+                </h3>
+                <p className="text-slate-300 text-sm">
+                  Return to the main Bridge platform
+                </p>
+              </a>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
