@@ -1,20 +1,27 @@
 # Quick Start Guide
 
-Get Bridge AI+BCI Platform running in minutes!
+Get Bridge AI+BCI Platform running in under 10 minutes.
 
-## 🚀 1-Minute Setup
+## 🚀 Prerequisites
 
-### Prerequisites
-- Docker & Docker Compose installed
-- Git installed
-- 8GB+ RAM available
+Before you begin, ensure you have:
 
-### Installation
+- **Node.js 18+** - [Download here](https://nodejs.org/)
+- **Python 3.9+** - [Download here](https://python.org/)
+- **Docker & Docker Compose** - [Install here](https://docs.docker.com/get-docker/)
+- **Git** - [Install here](https://git-scm.com/)
+
+## 📥 Installation
+
+### Option 1: Docker Compose (Recommended)
 
 ```bash
 # Clone the repository
 git clone https://github.com/ZhangZixunCodeSpace/bridge-ai-bci-platform.git
 cd bridge-ai-bci-platform
+
+# Copy environment configuration
+cp .env.example .env
 
 # Start all services with Docker
 docker-compose up -d
@@ -23,117 +30,199 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-### Access the Platform
+### Option 2: Manual Setup
+
+```bash
+# Clone and setup
+git clone https://github.com/ZhangZixunCodeSpace/bridge-ai-bci-platform.git
+cd bridge-ai-bci-platform
+
+# Install all dependencies
+npm run install:all
+
+# Setup environment
+cp .env.example .env
+
+# Start PostgreSQL and Redis (via Docker)
+docker-compose up -d database redis
+
+# Start all development servers
+npm run dev
+```
+
+## 🌐 Access the Platform
+
+Once everything is running, access:
 
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
 - **AI Service**: http://localhost:8000
 - **BCI Simulator**: http://localhost:9000
-- **API Documentation**: http://localhost:5000/api-docs
+- **API Docs**: http://localhost:5000/api-docs
 
-## 🎯 Your First Training Session
+## 🧠 Your First Training Session
 
-1. **Open Browser**: Navigate to http://localhost:3000
-2. **Welcome Screen**: Click "Start Neural Training Journey"
-3. **Neural Calibration**: Click "Begin Neural Calibration" and wait 30 seconds
-4. **Choose Scenario**: Select "Romantic Relationship" scenario
-5. **BCI Training**: Practice the conversation with real-time neural feedback
-6. **View Results**: See your neuroplasticity improvements!
+### Step 1: Open the Platform
+Navigate to http://localhost:3000 in your browser.
 
-## 🔧 Manual Setup (Alternative)
+### Step 2: Start Neural Training
+1. Click "🧠 Start Neural Training Journey"
+2. The system will guide you through:
+   - **Neural Calibration**: Establishes your brain baseline
+   - **Scenario Selection**: Choose your training focus
+   - **BCI Training**: Practice with real-time feedback
+   - **Results Analysis**: Review your improvements
 
-If you prefer to run services individually:
+### Step 3: Experience the Features
+- **Real-time Neural Feedback**: Watch your stress, empathy, and focus metrics
+- **AI Conversation Partner**: Practice with realistic conflict scenarios
+- **Neuroplasticity Analysis**: See how your brain changes during training
+- **Personalized Recommendations**: Get AI-powered improvement suggestions
+
+## 🔧 Configuration
+
+### Essential Environment Variables
+
+Edit your `.env` file:
 
 ```bash
-# Install all dependencies
-npm run install:all
+# Database (required)
+DATABASE_URL=postgresql://bridge_user:bridge_password@localhost:5432/bridge_db
 
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your configuration
+# Redis (required)
+REDIS_URL=redis://localhost:6379
 
-# Start all services in development mode
-npm run dev
+# OpenAI API (optional, for real AI responses)
+OPENAI_API_KEY=your-openai-api-key-here
+
+# Security (change in production!)
+JWT_SECRET=your-super-secret-jwt-key
 ```
 
-## 🧪 Testing the Setup
+### Feature Flags
+
+```bash
+# Enable/disable features
+FEATURE_BCI_HARDWARE=false    # Set to true for real BCI devices
+FEATURE_REAL_AI=true          # Use OpenAI or mock responses
+FEATURE_ANALYTICS=true        # Enable user analytics
+```
+
+## 📊 Verify Installation
 
 ### Health Checks
+
 ```bash
-# Check all services are running
-curl http://localhost:3000  # Frontend
-curl http://localhost:5000/health  # Backend
-curl http://localhost:8000/health  # AI Service
-curl http://localhost:9000/health  # BCI Simulator
+# Check all services
+curl http://localhost:3000          # Frontend
+curl http://localhost:5000/health    # Backend
+curl http://localhost:8000/health    # AI Service
+curl http://localhost:9000/health    # BCI Simulator
 ```
 
-### API Test
+### Database Check
+
 ```bash
-# Test BCI simulator
+# Connect to database
+docker exec -it bridge-database psql -U bridge_user -d bridge_db
+
+# List tables
+\dt
+
+# Exit
+\q
+```
+
+### BCI Simulator Check
+
+```bash
+# Test BCI device connection
 curl -X POST http://localhost:9000/api/connect \
   -H "Content-Type: application/json" \
   -d '{"deviceId": "simulator-1", "userId": "test-user"}'
 ```
 
-## 🔍 Verification
+## 🎯 What's Next?
 
-✅ **All services running**: Check Docker containers or terminal outputs  
-✅ **Frontend accessible**: Can load homepage  
-✅ **BCI simulation working**: Neural metrics updating in real-time  
-✅ **AI responses**: Can start a training conversation  
-✅ **WebSocket connection**: Real-time updates working  
+### For Developers
+- 📖 Read the [Development Guide](../development/development-guide.md)
+- 🔌 Explore the [API Documentation](../api/backend-api.md)
+- 🧪 Check out [Testing Guide](../development/testing.md)
+
+### For Researchers
+- 🧠 Learn about [BCI Integration](../bci/overview.md)
+- 🤖 Understand [AI Architecture](../ai/architecture.md)
+- 📈 Review [Scientific Background](../research/scientific-background.md)
+
+### For Business Users
+- 💼 See [Business Model](../business/business-model.md)
+- 📊 Check [Market Analysis](../business/market-analysis.md)
+- 💰 Review [Investment Information](../business/investment.md)
 
 ## 🆘 Troubleshooting
 
 ### Common Issues
 
-**Port conflicts**:
+**Services won't start?**
 ```bash
-# Check what's using the ports
-lsof -i :3000  # Frontend
-lsof -i :5000  # Backend
-lsof -i :8000  # AI Service
-lsof -i :9000  # BCI Simulator
+# Check Docker status
+docker-compose ps
+
+# View logs
+docker-compose logs [service-name]
+
+# Restart services
+docker-compose restart
 ```
 
-**Docker issues**:
+**Database connection errors?**
 ```bash
-# Reset Docker environment
-docker-compose down
-docker system prune -f
+# Reset database
+docker-compose down -v
+docker-compose up -d database
+wait 30 seconds
 docker-compose up -d
 ```
 
-**Memory issues**:
+**Frontend not loading?**
 ```bash
-# Check available memory
-free -h
-# Increase Docker memory allocation to 8GB+
+# Clear browser cache
+# Try incognito/private browsing
+# Check browser console for errors
 ```
 
-**Database connection issues**:
+**BCI simulator not responding?**
 ```bash
-# Check database logs
-docker-compose logs database
-# Restart database
-docker-compose restart database
+# Check WebSocket connection
+# Verify port 9001 is not blocked
+# Restart BCI simulator service
+docker-compose restart bci-simulator
 ```
 
 ### Getting Help
 
-- 📧 **General Help**: [hello@bridge-ai.com](mailto:hello@bridge-ai.com)
+- 📧 **Email**: [support@bridge-ai.com](mailto:support@bridge-ai.com)
 - 🐛 **Bug Reports**: [GitHub Issues](https://github.com/ZhangZixunCodeSpace/bridge-ai-bci-platform/issues)
 - 💬 **Community**: [Discord Server](https://discord.gg/bridge-ai)
 - 📚 **Documentation**: [Full Docs](../README.md)
 
-## 🎉 What's Next?
+## 🎉 Success!
 
-- **Explore Features**: Try different training scenarios
-- **Read Documentation**: Understanding the technology
-- **Contribute**: Join our development community
-- **Deploy**: Set up your own production instance
-- **Research**: Dive into the neuroscience
+You now have a fully functional Bridge AI+BCI Platform running locally!
 
----
+### Key Features You Can Explore:
+- ✅ Real-time neural signal simulation
+- ✅ AI-powered conversation generation
+- ✅ Interactive training scenarios
+- ✅ Neuroplasticity analysis
+- ✅ Personalized feedback
+- ✅ Progress tracking
 
-**Welcome to Bridge - where AI meets neuroscience to revolutionize human communication!** 🧠✨
+### Next Steps:
+1. **Try different training scenarios** (family, relationship, workplace)
+2. **Experiment with AI personality styles** (emotional, direct, logical)
+3. **Monitor your neural metrics** during training
+4. **Review your progress** in the analysis section
+5. **Explore the API documentation** for integration
+
+Welcome to the future of communication training! 🚀🧠

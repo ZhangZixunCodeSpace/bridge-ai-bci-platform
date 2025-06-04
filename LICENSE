@@ -1,0 +1,99 @@
+MIT License
+
+Copyright (c) 2025 Bridge AI Team
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## Additional Terms for Commercial Use
+
+While this project is open source under the MIT License, certain advanced features
+and enterprise integrations may require commercial licensing:
+
+### Open Source Features (MIT Licensed)
+- Core platform functionality
+- Basic AI conversation generation
+- BCI simulation and demo capabilities
+- Standard neural analysis algorithms
+- Community support
+
+### Commercial Features (Separate License Required)
+- Advanced neural analysis algorithms
+- Real-time hardware BCI integration
+- Enterprise-grade security features
+- Professional neural training protocols
+- Priority support and consulting
+- White-label solutions
+- API rate limits above community tier
+
+### Enterprise Licensing
+
+For commercial licensing, enterprise features, or custom development:
+
+**Contact**: business@bridge-ai.com
+**Website**: https://bridge-ai.com/enterprise
+
+### Research and Academic Use
+
+Academic institutions and researchers may qualify for additional features
+under our research program:
+
+**Contact**: research@bridge-ai.com
+**Website**: https://bridge-ai.com/research
+
+### Attribution Requirements
+
+When using Bridge in research or commercial applications, we appreciate
+attribution in the following format:
+
+```
+This work uses Bridge AI+BCI Platform
+(https://github.com/ZhangZixunCodeSpace/bridge-ai-bci-platform)
+```
+
+### Patents and Intellectual Property
+
+Certain algorithms and methodologies implemented in this software may be
+subject to patent applications. Commercial users should consult with legal
+counsel regarding potential patent implications.
+
+### Data Privacy and Compliance
+
+Users are responsible for ensuring compliance with applicable data protection
+regulations (GDPR, HIPAA, etc.) when handling neural data and personal information.
+The software provides tools for compliance but does not guarantee regulatory
+compliance.
+
+### Warranty Disclaimer
+
+This software is provided for research and development purposes. While we
+strive for accuracy in neural analysis and AI responses, the software should
+not be used for medical diagnosis or treatment without proper clinical validation
+and regulatory approval.
+
+---
+
+**Bridge AI Team**
+
+Email: legal@bridge-ai.com
+Website: https://bridge-ai.com
+GitHub: https://github.com/ZhangZixunCodeSpace/bridge-ai-bci-platform
+
+Last updated: June 2025
