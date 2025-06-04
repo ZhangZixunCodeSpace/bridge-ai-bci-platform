@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: bridge-platform
+  labels:
+    app.kubernetes.io/name: bridge
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/component: platform
+    app.kubernetes.io/managed-by: kubectl
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bridge-config
+  namespace: bridge-platform
+data:
+  NODE_ENV: "production"
+  FRONTEND_URL: "https://bridge-ai.com"
+  DATABASE_URL: "postgresql://bridge_user:$(POSTGRES_PASSWORD)@postgres:5432/bridge_db"
+  REDIS_URL: "redis://redis:6379"
+  AI_SERVICE_URL: "http://ai-service:8000"
+  BCI_SIMULATOR_URL: "http://bci-simulator:9000"
+  BCI_SAMPLE_RATE: "256"
+  BCI_CHANNELS: "32"
+  FEATURE_BCI_HARDWARE: "false"
+  FEATURE_REAL_AI: "true"
+  FEATURE_ANALYTICS: "true"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: bridge-secrets
+  namespace: bridge-platform
+type: Opaque
+data:
+  # Base64 encoded secrets - replace with actual values
+  JWT_SECRET: Y2hhbmdlLXRoaXMtaW4tcHJvZHVjdGlvbg==
+  POSTGRES_PASSWORD: YnJpZGdlX3Bhc3N3b3Jk
+  OPENAI_API_KEY: eW91ci1vcGVuYWktYXBpLWtleQ==
+  SENTRY_DSN: eW91ci1zZW50cnktZHNu
