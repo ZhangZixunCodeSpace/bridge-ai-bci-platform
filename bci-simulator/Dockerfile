@@ -1,0 +1,43 @@
+# BCI Simulator Dockerfile for Bridge Neural Signal Simulation
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Build TypeScript
+RUN npm run build
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S bridge -u 1001
+
+# Change ownership of app directory
+RUN chown -R bridge:nodejs /app
+USER bridge
+
+# Expose ports (HTTP server and WebSocket)
+EXPOSE 9000 9001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:9000/health || exit 1
+
+# Start the BCI simulator
+CMD ["npm", "start"]
