@@ -33,6 +33,28 @@ export class MathUtils {
     return Math.max(...data) - Math.min(...data);
   }
 
+  static kurtosis(data: number[]): number {
+    const mean = this.mean(data);
+    const std = this.standardDeviation(data);
+    const n = data.length;
+    
+    const fourthMoment = data.reduce((sum, x) => {
+      return sum + Math.pow((x - mean) / std, 4);
+    }, 0) / n;
+    
+    return fourthMoment - 3; // Excess kurtosis
+  }
+
+  static skewness(data: number[]): number {
+    const mean = this.mean(data);
+    const std = this.standardDeviation(data);
+    const n = data.length;
+    
+    return data.reduce((sum, x) => {
+      return sum + Math.pow((x - mean) / std, 3);
+    }, 0) / n;
+  }
+
   static crossCorrelation(x: number[], y: number[]): number[] {
     const result: number[] = [];
     const n = Math.min(x.length, y.length);
@@ -117,7 +139,7 @@ export class FFT {
           const tempImag = xreal * wimag + ximag * wreal;
           
           realOut[j + halfsize] = realOut[j] - tempReal;
-          imagOut[j + halfsize] = imagOut[j] - tempImag;
+          imagOut[j + halfsize] = realOut[j] - tempImag;
           realOut[j] += tempReal;
           imagOut[j] += tempImag;
         }
@@ -129,6 +151,10 @@ export class FFT {
 
   static magnitude(real: number[], imag: number[]): number[] {
     return real.map((r, i) => Math.sqrt(r * r + imag[i] * imag[i]));
+  }
+
+  static phase(real: number[], imag: number[]): number[] {
+    return real.map((r, i) => Math.atan2(imag[i], r));
   }
 
   static powerSpectrum(data: number[]): number[] {
@@ -190,6 +216,20 @@ export class FrequencyAnalysis {
     return bandPowers;
   }
 
+  static relativeBandPowers(bandPowers: FrequencyBandPowers): FrequencyBandPowers {
+    const total = Object.values(bandPowers).reduce((sum, power) => sum + power, 0);
+    
+    if (total === 0) return bandPowers;
+    
+    return {
+      delta: bandPowers.delta / total,
+      theta: bandPowers.theta / total,
+      alpha: bandPowers.alpha / total,
+      beta: bandPowers.beta / total,
+      gamma: bandPowers.gamma / total
+    };
+  }
+
   static dominantFrequency(data: number[], sampleRate: number): number {
     const powerSpectrum = FFT.powerSpectrum(data);
     const frequencies = FFT.frequencyBins(sampleRate, data.length);
@@ -205,6 +245,38 @@ export class FrequencyAnalysis {
     });
     
     return dominantFreq;
+  }
+
+  static spectralCentroid(data: number[], sampleRate: number): number {
+    const powerSpectrum = FFT.powerSpectrum(data);
+    const frequencies = FFT.frequencyBins(sampleRate, data.length);
+    
+    let weightedSum = 0;
+    let totalPower = 0;
+    
+    powerSpectrum.forEach((power, i) => {
+      weightedSum += frequencies[i] * power;
+      totalPower += power;
+    });
+    
+    return totalPower > 0 ? weightedSum / totalPower : 0;
+  }
+
+  static spectralBandwidth(data: number[], sampleRate: number): number {
+    const powerSpectrum = FFT.powerSpectrum(data);
+    const frequencies = FFT.frequencyBins(sampleRate, data.length);
+    const centroid = this.spectralCentroid(data, sampleRate);
+    
+    let weightedVariance = 0;
+    let totalPower = 0;
+    
+    powerSpectrum.forEach((power, i) => {
+      const freqDiff = frequencies[i] - centroid;
+      weightedVariance += freqDiff * freqDiff * power;
+      totalPower += power;
+    });
+    
+    return totalPower > 0 ? Math.sqrt(weightedVariance / totalPower) : 0;
   }
 }
 
