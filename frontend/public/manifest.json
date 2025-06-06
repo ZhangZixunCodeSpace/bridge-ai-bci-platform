@@ -1,28 +1,181 @@
 {
   "short_name": "Bridge",
-  "name": "Bridge AI+BCI Platform",
-  "description": "Neural communication training through AI and brain-computer interfaces",
+  "name": "Bridge - AI+BCI Neural Communication Training",
+  "description": "The world's first AI+BCI platform for revolutionary communication training. Transform your neural pathways and revolutionize how you connect with others.",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
     },
     {
-      "src": "logo192.png",
+      "src": "icons/icon-96x96.png",
+      "sizes": "96x96",
       "type": "image/png",
-      "sizes": "192x192"
+      "purpose": "maskable any"
     },
     {
-      "src": "logo512.png",
+      "src": "icons/icon-128x128.png",
+      "sizes": "128x128",
       "type": "image/png",
-      "sizes": "512x512"
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "theme_color": "#fbbf24",
   "background_color": "#0c1445",
-  "categories": ["education", "health", "productivity"],
-  "orientation": "portrait-primary"
+  "scope": "/",
+  "lang": "en-US",
+  "categories": [
+    "health",
+    "education",
+    "productivity",
+    "medical"
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Training",
+      "short_name": "Train",
+      "description": "Begin your neural communication training session",
+      "url": "/training",
+      "icons": [
+        {
+          "src": "icons/shortcut-training.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your neural training progress and analytics",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "icons/shortcut-dashboard.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "BCI Monitor",
+      "short_name": "BCI",
+      "description": "Real-time brain-computer interface monitoring",
+      "url": "/bci-monitor",
+      "icons": [
+        {
+          "src": "icons/shortcut-bci.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/desktop-home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Bridge AI+BCI Platform - Neural Training Interface"
+    },
+    {
+      "src": "screenshots/mobile-training.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Mobile BCI Training Session"
+    }
+  ],
+  "related_applications": [
+    {
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.bridge.neuraltraining",
+      "id": "com.bridge.neuraltraining"
+    },
+    {
+      "platform": "itunes",
+      "url": "https://apps.apple.com/app/bridge-neural-training/id123456789",
+      "id": "123456789"
+    }
+  ],
+  "prefer_related_applications": false,
+  "protocol_handlers": [
+    {
+      "protocol": "web+bridge",
+      "url": "/handle?url=%s"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "share_target": {
+    "action": "/share-target",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": ["image/*", "audio/*"]
+        }
+      ]
+    }
+  },
+  "capture_links": "new-client",
+  "display_override": ["window-controls-overlay", "standalone", "browser"],
+  "file_handlers": [
+    {
+      "action": "/open-neural-data",
+      "accept": {
+        "application/neural-data": [".ndt", ".bci"]
+      },
+      "icons": [
+        {
+          "src": "icons/neural-file.png",
+          "sizes": "256x256",
+          "type": "image/png"
+        }
+      ],
+      "launch_type": "single-client"
+    }
+  ]
 }
