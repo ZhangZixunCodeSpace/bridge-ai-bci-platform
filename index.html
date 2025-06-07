@@ -2004,9 +2004,12 @@
             }
             
             const responses = {
-                'defensive': '😤 "That\'s not true! I do listen to you."',
-                'empathetic': '🤝 "I hear you saying you feel unheard. That must be frustrating."',
-                'neutral': '💭 "Can you help me understand what makes you feel that way?"'
+                'defensive': '"That\'s not true! I do listen to you."',
+                'empathetic': '"I hear you saying you feel unheard. That must be frustrating."',
+                'neutral': '"Can you help me understand what makes you feel that way?"',
+                'curious': '"What would help you feel more heard in our conversations?"',
+                'validating': '"I want to understand your perspective better. This matters to me."',
+                'solution-focused': '"How can we improve our communication moving forward?"'
             };
             
             addTrainingMessage(responses[responseType], 'user');
