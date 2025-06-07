@@ -1145,17 +1145,53 @@
                                 </div>
                             </div>
 
-                            <div class="response-options" id="response-options">
-                                <button class="response-option defensive" onclick="selectResponse('defensive')">
-                                    😤 "That's not true! I do listen to you."
-                                </button>
-                                <button class="response-option empathetic" onclick="selectResponse('empathetic')">
-                                    🤝 "I hear you saying you feel unheard. That must be frustrating."
-                                </button>
-                                <button class="response-option" onclick="selectResponse('neutral')">
-                                    💭 "Can you help me understand what makes you feel that way?"
-                                </button>
-                            </div>
+            <div class="response-options" id="response-options">
+                <button class="response-option defensive" onclick="selectResponse('defensive')">
+                    😤 "That's not true! I do listen to you."
+                </button>
+                <button class="response-option empathetic" onclick="selectResponse('empathetic')">
+                    🤝 "I hear you saying you feel unheard. That must be frustrating."
+                </button>
+                <button class="response-option" onclick="selectResponse('neutral')">
+                    💭 "Can you help me understand what makes you feel that way?"
+                </button>
+                <button class="response-option" onclick="selectResponse('curious')">
+                    🧐 "What would help you feel more heard in our conversations?"
+                </button>
+                <button class="response-option empathetic" onclick="selectResponse('validating')">
+                    💝 "I want to understand your perspective better. This matters to me."
+                </button>
+                <button class="response-option" onclick="selectResponse('solution-focused')">
+                    🎯 "How can we improve our communication moving forward?"
+                </button>
+                <button class="response-option" onclick="selectResponse('custom')" style="background: rgba(251, 191, 36, 0.2); border-color: #fbbf24;">
+                    ✨ Write Custom AI Response
+                </button>
+            </div>
+
+            <!-- Custom Response Input -->
+            <div id="custom-response-section" style="display: none; margin-top: 16px;">
+                <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 12px; padding: 16px;">
+                    <h4 style="color: #fbbf24; margin-bottom: 12px;">🤖 AI-Enhanced Response Generator</h4>
+                    <textarea id="custom-response-input" placeholder="Type your response here, and our AI will analyze and improve it..." 
+                        style="width: 100%; height: 80px; background: rgba(12, 20, 69, 0.6); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 8px; padding: 12px; color: #e2e8f0; font-family: inherit; resize: vertical;"></textarea>
+                    <div style="display: flex; gap: 8px; margin-top: 12px;">
+                        <button class="primary-button" onclick="enhanceWithAI()" style="padding: 8px 16px; font-size: 14px;">
+                            🧠 Enhance with AI
+                        </button>
+                        <button class="secondary-button" onclick="sendCustomResponse()" style="padding: 8px 16px; font-size: 14px;">
+                            📤 Send Response
+                        </button>
+                        <button class="secondary-button" onclick="cancelCustomResponse()" style="padding: 8px 16px; font-size: 14px;">
+                            ❌ Cancel
+                        </button>
+                    </div>
+                    <div id="ai-suggestions" style="margin-top: 12px; display: none;">
+                        <h5 style="color: #6ee7b7; margin-bottom: 8px;">🤖 AI Suggestions:</h5>
+                        <div id="ai-suggestion-content" style="background: rgba(4, 120, 87, 0.1); border: 1px solid #047857; border-radius: 8px; padding: 12px; color: #cbd5e1; font-size: 14px;"></div>
+                    </div>
+                </div>
+            </div>
 
                             <div style="background: rgba(12, 20, 69, 0.4); padding: 16px; border-radius: 12px; margin-top: 16px;">
                                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -1952,6 +1988,11 @@
         }
 
         function selectResponse(responseType) {
+            if (responseType === 'custom') {
+                showCustomResponseSection();
+                return;
+            }
+            
             const responses = {
                 'defensive': '😤 "That\'s not true! I do listen to you."',
                 'empathetic': '🤝 "I hear you saying you feel unheard. That must be frustrating."',
@@ -2357,6 +2398,249 @@
                 initializeWaveform();
             }, 500);
         });
+
+        // AI-Enhanced Custom Response Functions
+        function showCustomResponseSection() {
+            document.getElementById('custom-response-section').style.display = 'block';
+            document.getElementById('custom-response-input').focus();
+            
+            // Hide default response options
+            document.querySelectorAll('.response-option').forEach(btn => {
+                btn.style.opacity = '0.3';
+                btn.disabled = true;
+            });
+        }
+
+        function enhanceWithAI() {
+            const input = document.getElementById('custom-response-input').value.trim();
+            if (!input) {
+                alert('Please enter a response first!');
+                return;
+            }
+
+            // Show loading state
+            const enhanceBtn = event.target;
+            enhanceBtn.textContent = '🤖 Analyzing...';
+            enhanceBtn.disabled = true;
+
+            // Simulate AI processing delay
+            setTimeout(() => {
+                const analysis = analyzeResponseWithAI(input);
+                showAISuggestions(analysis);
+                enhanceBtn.textContent = '🧠 Enhance with AI';
+                enhanceBtn.disabled = false;
+            }, 1500);
+        }
+
+        function analyzeResponseWithAI(userInput) {
+            // Sophisticated AI analysis of user's response
+            const emotionalWords = ['feel', 'hurt', 'frustrated', 'understand', 'sorry', 'love'];
+            const defensiveWords = ['not', 'wrong', 'but', 'however', 'never', 'always'];
+            const questionWords = ['what', 'how', 'why', 'when', 'could', 'would'];
+            
+            const inputLower = userInput.toLowerCase();
+            const emotionalScore = emotionalWords.filter(word => inputLower.includes(word)).length;
+            const defensiveScore = defensiveWords.filter(word => inputLower.includes(word)).length;
+            const questionScore = questionWords.filter(word => inputLower.includes(word)).length;
+
+            let aiSuggestion = '';
+            let empathyBoost = '';
+            let neuralTip = '';
+
+            if (emotionalScore > 1) {
+                aiSuggestion = `✅ Great emotional awareness! Your response shows empathy. Consider adding more specific validation: "${userInput} I can see this really matters to you."`;
+                empathyBoost = '+15 Empathy Score predicted';
+                neuralTip = 'This will activate mirror neurons and strengthen emotional connection pathways.';
+            } else if (defensiveScore > 1) {
+                aiSuggestion = `⚠️ This response may sound defensive. Try: "I hear you saying [their concern]. Help me understand what would make you feel more heard."`;
+                empathyBoost = '-5 Empathy Score (defensive patterns detected)';
+                neuralTip = 'Defensive responses activate amygdala stress responses. Try empathetic listening instead.';
+            } else if (questionScore > 0) {
+                aiSuggestion = `🧠 Good inquiry approach! Enhance it: "${userInput} I want to understand your perspective better because this relationship matters to me."`;
+                empathyBoost = '+8 Empathy Score';
+                neuralTip = 'Questions activate prefrontal cortex and show genuine interest.';
+            } else {
+                aiSuggestion = `💡 Good start! Consider adding emotional validation: "I hear what you're saying and I want to understand how you feel about this."`;
+                empathyBoost = '+5 Empathy Score';
+                neuralTip = 'Adding emotional validation will strengthen neural pathways for empathy.';
+            }
+
+            return {
+                suggestion: aiSuggestion,
+                empathyImpact: empathyBoost,
+                neuralInsight: neuralTip,
+                improvedResponse: generateImprovedResponse(userInput, emotionalScore, defensiveScore)
+            };
+        }
+
+        function generateImprovedResponse(original, emotionalScore, defensiveScore) {
+            if (defensiveScore > 1) {
+                return `I hear you saying you feel unheard when we talk. That must be really frustrating for you. Can you help me understand what would make you feel more listened to?`;
+            } else if (emotionalScore > 0) {
+                return `${original} I can see this is really important to you, and I want to understand your feelings better.`;
+            } else {
+                return `I appreciate you sharing this with me. Help me understand what's most important to you in our conversations so I can be a better listener.`;
+            }
+        }
+
+        function showAISuggestions(analysis) {
+            const suggestionsDiv = document.getElementById('ai-suggestions');
+            const contentDiv = document.getElementById('ai-suggestion-content');
+            
+            contentDiv.innerHTML = `
+                <div style="margin-bottom: 12px;">
+                    <strong style="color: #6ee7b7;">🤖 AI Analysis:</strong><br>
+                    ${analysis.suggestion}
+                </div>
+                <div style="margin-bottom: 12px; padding: 8px; background: rgba(251, 191, 36, 0.1); border-radius: 6px;">
+                    <strong style="color: #fbbf24;">🧠 Neural Impact:</strong> ${analysis.empathyImpact}<br>
+                    <small>${analysis.neuralInsight}</small>
+                </div>
+                <div style="margin-bottom: 12px;">
+                    <strong style="color: #6ee7b7;">✨ AI-Improved Response:</strong><br>
+                    <div style="background: rgba(4, 120, 87, 0.2); padding: 10px; border-radius: 6px; margin-top: 6px; font-style: italic;">
+                        "${analysis.improvedResponse}"
+                    </div>
+                </div>
+                <button onclick="useAISuggestion('${analysis.improvedResponse.replace(/'/g, "\\'")}')" 
+                        style="background: #6ee7b7; color: #0c1445; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 8px;">
+                    ✅ Use AI-Enhanced Response
+                </button>
+            `;
+            
+            suggestionsDiv.style.display = 'block';
+        }
+
+        function useAISuggestion(suggestion) {
+            document.getElementById('custom-response-input').value = suggestion;
+            document.getElementById('ai-suggestions').style.display = 'none';
+        }
+
+        function sendCustomResponse() {
+            const input = document.getElementById('custom-response-input').value.trim();
+            if (!input) {
+                alert('Please enter a response!');
+                return;
+            }
+
+            // Add the custom response to chat
+            addTrainingMessage(input, 'user');
+            
+            // Hide custom response section
+            cancelCustomResponse();
+            
+            // Analyze the custom response for AI feedback
+            setTimeout(() => {
+                const analysis = analyzeResponseWithAI(input);
+                const neuralFeedback = generateNeuralFeedback(analysis);
+                addTrainingMessage(`🧠 ${neuralFeedback}`, 'bci-feedback');
+                
+                // Update BCI metrics based on AI analysis
+                updateBCIBasedOnAI(analysis);
+                
+                // Generate AI partner response
+                setTimeout(() => {
+                    const aiResponse = generateDynamicAIResponse(input);
+                    addTrainingMessage(aiResponse, 'ai');
+                    
+                    trainingData.exchanges++;
+                    updateTrainingProgress();
+                    
+                    if (trainingData.exchanges >= 4) {
+                        setTimeout(() => completeTraining(), 2000);
+                    } else {
+                        setTimeout(() => {
+                            document.querySelectorAll('.response-option').forEach(btn => {
+                                btn.disabled = false;
+                                btn.style.opacity = '1';
+                            });
+                        }, 2000);
+                    }
+                }, 1500);
+            }, 500);
+        }
+
+        function generateNeuralFeedback(analysis) {
+            if (analysis.empathyImpact.includes('+15')) {
+                return '🎉 Exceptional empathy activation! Strong mirror neuron engagement detected.';
+            } else if (analysis.empathyImpact.includes('+')) {
+                return '✅ Positive neural response! Empathy pathways strengthening.';
+            } else if (analysis.empathyImpact.includes('-')) {
+                return '⚠️ Defensive neural patterns detected. Amygdala activation increased.';
+            } else {
+                return '🧠 Neural activity moderate. Consider more emotional validation.';
+            }
+        }
+
+        function updateBCIBasedOnAI(analysis) {
+            if (analysis.empathyImpact.includes('+15')) {
+                trainingData.stress -= 10;
+                trainingData.empathy += 15;
+                trainingData.regulation += 8;
+                trainingData.pathways += 5;
+            } else if (analysis.empathyImpact.includes('+')) {
+                trainingData.stress -= 5;
+                trainingData.empathy += 8;
+                trainingData.regulation += 5;
+                trainingData.pathways += 3;
+            } else if (analysis.empathyImpact.includes('-')) {
+                trainingData.stress += 8;
+                trainingData.empathy -= 5;
+                trainingData.regulation -= 3;
+                trainingData.pathways += 1;
+            }
+            
+            // Keep values in bounds
+            trainingData.stress = Math.max(10, Math.min(100, trainingData.stress));
+            trainingData.empathy = Math.max(20, Math.min(100, trainingData.empathy));
+            trainingData.regulation = Math.max(30, Math.min(100, trainingData.regulation));
+            
+            updateTrainingBCI();
+        }
+
+        function generateDynamicAIResponse(userInput) {
+            const responses = {
+                empathetic: [
+                    "Thank you for really listening. I feel much more understood now.",
+                    "I appreciate you acknowledging my feelings. That means a lot to me.",
+                    "This is exactly what I needed - to feel heard and validated."
+                ],
+                neutral: [
+                    "I'm glad we're talking about this. It helps me feel more connected to you.",
+                    "That's a fair question. Let me think about how to explain it better.",
+                    "I appreciate you wanting to understand my perspective."
+                ],
+                defensive_response: [
+                    "I still don't feel like you're really getting what I'm saying.",
+                    "It seems like you're more focused on defending yourself than understanding me.",
+                    "This is exactly what I mean - you're not really listening."
+                ]
+            };
+
+            const inputLower = userInput.toLowerCase();
+            const hasEmpathy = ['feel', 'understand', 'hear', 'sorry'].some(word => inputLower.includes(word));
+            const isDefensive = ['not', 'wrong', 'but'].some(word => inputLower.includes(word));
+
+            if (hasEmpathy) {
+                return responses.empathetic[Math.floor(Math.random() * responses.empathetic.length)];
+            } else if (isDefensive) {
+                return responses.defensive_response[Math.floor(Math.random() * responses.defensive_response.length)];
+            } else {
+                return responses.neutral[Math.floor(Math.random() * responses.neutral.length)];
+            }
+        }
+
+        function cancelCustomResponse() {
+            document.getElementById('custom-response-section').style.display = 'none';
+            document.getElementById('custom-response-input').value = '';
+            document.getElementById('ai-suggestions').style.display = 'none';
+            
+            // Restore default response options
+            document.querySelectorAll('.response-option').forEach(btn => {
+                btn.style.opacity = '1';
+                btn.disabled = false;
+            });
+        }
 
         // Initialize
         setInterval(updateBCIMetrics, 3000);
