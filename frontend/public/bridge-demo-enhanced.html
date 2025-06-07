@@ -898,8 +898,28 @@
                         </button>
                     </div>
 
-                    <!-- BCI Demo Panel -->
-                    <div class="bci-panel" style="margin-top: 60px;">
+                    <!-- Share This Demo -->
+                    <div style="background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 16px; padding: 24px; margin-bottom: 30px; text-align: center;">
+                        <h3 style="color: #fbbf24; margin-bottom: 16px;">🚀 Share This BCI Demo</h3>
+                        <p style="color: #cbd5e1; margin-bottom: 20px; font-size: 14px;">Let others experience the future of neural communication training</p>
+                        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                            <button class="secondary-button" onclick="copyShareLink()" id="copy-link-btn" style="padding: 12px 24px; font-size: 14px;">
+                                📋 Copy Demo Link
+                            </button>
+                            <button class="secondary-button" onclick="shareOnTwitter()" style="padding: 12px 24px; font-size: 14px;">
+                                🐦 Share on Twitter
+                            </button>
+                            <button class="secondary-button" onclick="shareOnLinkedIn()" style="padding: 12px 24px; font-size: 14px;">
+                                💼 Share on LinkedIn
+                            </button>
+                        </div>
+                        <div id="share-success" style="color: #6ee7b7; margin-top: 12px; font-size: 14px; display: none;">
+                            ✅ Link copied to clipboard!
+                        </div>
+                    </div>
+
+                    <!-- BCI Demo Panel with Live Waveform -->
+                    <div class="bci-panel" style="margin-top: 30px;">
                         <div class="bci-title">🧠 Live Neural Demo - Your Brain State Now</div>
                         <div class="bci-metrics">
                             <div class="metric">
@@ -915,6 +935,18 @@
                                 <div class="metric-label">Empathy Score</div>
                             </div>
                         </div>
+                        
+                        <!-- Live BCI Waveform Visualization -->
+                        <div style="background: rgba(12, 20, 69, 0.8); border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid rgba(251, 191, 36, 0.2);">
+                            <h4 style="color: #6ee7b7; margin-bottom: 16px; text-align: center;">⚡ Live EEG Waveform</h4>
+                            <canvas id="bci-waveform" width="600" height="200" style="width: 100%; height: 200px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(251, 191, 36, 0.2);"></canvas>
+                            <div style="display: flex; justify-content: space-between; margin-top: 12px; font-size: 12px; color: #94a3b8;">
+                                <span>Alpha: <span id="alpha-freq" style="color: #6ee7b7;">8.2 Hz</span></span>
+                                <span>Beta: <span id="beta-freq" style="color: #fbbf24;">15.7 Hz</span></span>
+                                <span>Theta: <span id="theta-freq" style="color: #f59e0b;">6.1 Hz</span></span>
+                            </div>
+                        </div>
+                        
                         <div style="text-align: center; margin-top: 16px; font-size: 14px; opacity: 0.9;">
                             ⚡ Simulated BCI reading - Your actual neural patterns would be monitored during training
                         </div>
@@ -1655,6 +1687,151 @@
                     trainingConfig[category] = this.dataset.value;
                 });
             });
+        });
+
+        // Share functionality
+        function copyShareLink() {
+            const shareLink = window.location.href;
+            navigator.clipboard.writeText(shareLink)
+                .then(() => {
+                    const btn = document.getElementById('copy-link-btn');
+                    const success = document.getElementById('share-success');
+                    btn.textContent = '✅ Copied!';
+                    success.style.display = 'block';
+                    setTimeout(() => {
+                        btn.textContent = '📋 Copy Demo Link';
+                        success.style.display = 'none';
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Copy failed', err);
+                    alert('Copy failed. Please copy the URL manually: ' + window.location.href);
+                });
+        }
+
+        function shareOnTwitter() {
+            const text = encodeURIComponent('Check out this amazing AI+BCI neural communication training demo! 🧠⚡');
+            const url = encodeURIComponent(window.location.href);
+            const twitterUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+            window.open(twitterUrl, '_blank', 'width=600,height=400');
+        }
+
+        function shareOnLinkedIn() {
+            const url = encodeURIComponent(window.location.href);
+            const title = encodeURIComponent('Bridge - AI+BCI Communication Training Platform');
+            const summary = encodeURIComponent('Revolutionary neural training for better communication skills');
+            const linkedInUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}&title=${title}&summary=${summary}`;
+            window.open(linkedInUrl, '_blank', 'width=600,height=400');
+        }
+
+        // BCI Waveform Visualization
+        let waveformCanvas, waveformCtx;
+        let waveformData = [];
+        let animationFrame;
+
+        function initializeWaveform() {
+            waveformCanvas = document.getElementById('bci-waveform');
+            if (!waveformCanvas) return;
+            
+            waveformCtx = waveformCanvas.getContext('2d');
+            waveformCanvas.width = 600;
+            waveformCanvas.height = 200;
+            
+            // Initialize with baseline data
+            for (let i = 0; i < 600; i++) {
+                waveformData.push(Math.sin(i * 0.02) * 20 + 100);
+            }
+            
+            startWaveformAnimation();
+        }
+
+        function startWaveformAnimation() {
+            function animate() {
+                updateWaveformData();
+                drawWaveform();
+                animationFrame = requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function updateWaveformData() {
+            // Simulate real-time EEG data
+            const time = Date.now() * 0.005;
+            const alpha = Math.sin(time * 0.8) * 15; // 8 Hz alpha waves
+            const beta = Math.sin(time * 1.5) * 8;   // 15 Hz beta waves
+            const theta = Math.sin(time * 0.6) * 12; // 6 Hz theta waves
+            const noise = (Math.random() - 0.5) * 5;
+            
+            const newValue = 100 + alpha + beta + theta + noise;
+            
+            // Shift data left and add new point
+            waveformData.shift();
+            waveformData.push(newValue);
+            
+            // Update frequency displays
+            document.getElementById('alpha-freq').textContent = `${(8.2 + Math.sin(time) * 0.3).toFixed(1)} Hz`;
+            document.getElementById('beta-freq').textContent = `${(15.7 + Math.sin(time * 1.2) * 0.8).toFixed(1)} Hz`;
+            document.getElementById('theta-freq').textContent = `${(6.1 + Math.sin(time * 0.8) * 0.4).toFixed(1)} Hz`;
+        }
+
+        function drawWaveform() {
+            if (!waveformCtx) return;
+            
+            const width = waveformCanvas.width;
+            const height = waveformCanvas.height;
+            
+            // Clear canvas
+            waveformCtx.clearRect(0, 0, width, height);
+            
+            // Draw grid
+            waveformCtx.strokeStyle = 'rgba(251, 191, 36, 0.1)';
+            waveformCtx.lineWidth = 1;
+            
+            // Vertical grid lines
+            for (let i = 0; i < width; i += 50) {
+                waveformCtx.beginPath();
+                waveformCtx.moveTo(i, 0);
+                waveformCtx.lineTo(i, height);
+                waveformCtx.stroke();
+            }
+            
+            // Horizontal grid lines
+            for (let i = 0; i < height; i += 40) {
+                waveformCtx.beginPath();
+                waveformCtx.moveTo(0, i);
+                waveformCtx.lineTo(width, i);
+                waveformCtx.stroke();
+            }
+            
+            // Draw waveform
+            waveformCtx.strokeStyle = '#fbbf24';
+            waveformCtx.lineWidth = 2;
+            waveformCtx.shadowColor = '#fbbf24';
+            waveformCtx.shadowBlur = 5;
+            
+            waveformCtx.beginPath();
+            for (let i = 0; i < waveformData.length; i++) {
+                const x = i;
+                const y = waveformData[i];
+                
+                if (i === 0) {
+                    waveformCtx.moveTo(x, y);
+                } else {
+                    waveformCtx.lineTo(x, y);
+                }
+            }
+            waveformCtx.stroke();
+            
+            // Reset shadow
+            waveformCtx.shadowBlur = 0;
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize sharing and waveform after a short delay
+            setTimeout(() => {
+                initializeWaveform();
+            }, 500);
         });
 
         // Initialize
