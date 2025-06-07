@@ -1978,6 +1978,16 @@
         function initializeTraining() {
             trainingData.exchanges = 0;
             trainingData.pathways = 0;
+            
+            // Clear chat first
+            const chatContainer = document.getElementById('training-chat');
+            chatContainer.innerHTML = '';
+            
+            // Add initial messages
+            addTrainingMessage('🔄 Training scenario initialized. Your virtual partner is ready for practice.', 'system');
+            addTrainingMessage('I feel like you never really listen to what I\'m saying. You\'re always distracted when we talk.', 'ai');
+            addTrainingMessage('🧠 BCI Alert: Choose your response. Your neural patterns are being analyzed in real-time...', 'system');
+            
             updateTrainingProgress();
             updateTrainingBCI();
             
