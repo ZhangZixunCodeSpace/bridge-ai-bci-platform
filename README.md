@@ -4,7 +4,7 @@
   <h1>🧠 Rewriting Human Communication, One Neural Pathway at a Time</h1>
   <p><em>The world's first AI+BCI platform for revolutionary communication training</em></p>
   
-  [![Demo](https://img.shields.io/badge/🎮_Live_Demo-Try_Now-gold?style=for-the-badge&logo=rocket)](http://localhost:3000/demo.html)
+  [![Demo](https://img.shields.io/badge/🎮_Live_Demo-Try_Now-gold?style=for-the-badge&logo=rocket)](https://zhangzixuncodespace.github.io/bridge-ai-bci-platform/)
   [![React App](https://img.shields.io/badge/📱_React_App-Launch-blue?style=for-the-badge&logo=react)](http://localhost:3000)
   [![Investment](https://img.shields.io/badge/💼_Series_A-$80M-green?style=for-the-badge&logo=money)](mailto:investors@bridge-ai.com)
 </div>
