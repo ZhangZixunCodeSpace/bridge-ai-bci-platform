@@ -1152,25 +1152,16 @@
                             </div>
 
             <div class="response-options" id="response-options">
-                <button class="response-option defensive" onclick="selectResponse('defensive')">
-                    😤 "That's not true! I do listen to you."
-                </button>
                 <button class="response-option empathetic" onclick="selectResponse('empathetic')">
                     🤝 "I hear you saying you feel unheard. That must be frustrating."
                 </button>
                 <button class="response-option" onclick="selectResponse('neutral')">
                     💭 "Can you help me understand what makes you feel that way?"
                 </button>
-                <button class="response-option" onclick="selectResponse('curious')">
-                    🧐 "What would help you feel more heard in our conversations?"
+                <button class="response-option defensive" onclick="selectResponse('defensive')">
+                    😤 "That's not true! I do listen to you."
                 </button>
-                <button class="response-option empathetic" onclick="selectResponse('validating')">
-                    💝 "I want to understand your perspective better. This matters to me."
-                </button>
-                <button class="response-option" onclick="selectResponse('solution-focused')">
-                    🎯 "How can we improve our communication moving forward?"
-                </button>
-                <button class="response-option" onclick="selectResponse('custom')" style="background: rgba(251, 191, 36, 0.2); border-color: #fbbf24;">
+                <button class="response-option" onclick="selectResponse('custom')" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.3)); border: 2px solid #fbbf24; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.2);">
                     ✨ Write Custom AI Response
                 </button>
             </div>
@@ -1982,8 +1973,14 @@
 
         // Step 3: Training
         function initializeTraining() {
-            trainingData.exchanges = 0;
-            trainingData.pathways = 0;
+            // Reset training data to valid numbers
+            trainingData = {
+                stress: 45,
+                empathy: 65, 
+                regulation: 78,
+                pathways: 0,
+                exchanges: 0
+            };
             
             // Clear chat first
             const chatContainer = document.getElementById('training-chat');
@@ -2045,6 +2042,9 @@
         }
 
         function analyzeResponse(responseType) {
+            // Validate trainingData before analysis
+            validateTrainingData();
+            
             let feedback = '';
             let bciChanges = {};
             
@@ -2061,12 +2061,33 @@
                     feedback = '🧠 Good inquiry approach. Moderate neural improvement detected.';
                     bciChanges = { stress: -5, empathy: +8, regulation: +5, pathways: +2 };
                     break;
+                case 'curious':
+                    feedback = '🧠 Excellent curious inquiry! Seeking understanding strengthens neural connections.';
+                    bciChanges = { stress: -8, empathy: +12, regulation: +7, pathways: +3 };
+                    break;
+                case 'validating':
+                    feedback = '✅ Great validation approach! Emotional connection pathways strengthening.';
+                    bciChanges = { stress: -10, empathy: +15, regulation: +8, pathways: +4 };
+                    break;
+                case 'solution-focused':
+                    feedback = '🧠 Constructive solution focus detected. Collaborative neural patterns activated.';
+                    bciChanges = { stress: -6, empathy: +10, regulation: +9, pathways: +3 };
+                    break;
+                default:
+                    feedback = '🧠 Neural response recorded. Processing communication patterns.';
+                    bciChanges = { stress: 0, empathy: +2, regulation: +1, pathways: +1 };
             }
             
-            trainingData.stress = Math.max(10, Math.min(100, trainingData.stress + bciChanges.stress));
-            trainingData.empathy = Math.max(20, Math.min(100, trainingData.empathy + bciChanges.empathy));
-            trainingData.regulation = Math.max(30, Math.min(100, trainingData.regulation + bciChanges.regulation));
-            trainingData.pathways += bciChanges.pathways;
+            // Apply changes with NaN protection
+            const currentStress = (isNaN(trainingData.stress) ? 45 : trainingData.stress);
+            const currentEmpathy = (isNaN(trainingData.empathy) ? 65 : trainingData.empathy);
+            const currentRegulation = (isNaN(trainingData.regulation) ? 78 : trainingData.regulation);
+            const currentPathways = (isNaN(trainingData.pathways) ? 0 : trainingData.pathways);
+            
+            trainingData.stress = Math.max(10, Math.min(100, currentStress + (bciChanges.stress || 0)));
+            trainingData.empathy = Math.max(20, Math.min(100, currentEmpathy + (bciChanges.empathy || 0)));
+            trainingData.regulation = Math.max(30, Math.min(100, currentRegulation + (bciChanges.regulation || 0)));
+            trainingData.pathways = Math.max(0, currentPathways + (bciChanges.pathways || 0));
             
             showNeuralFeedback(feedback);
             addTrainingMessage(`🧠 ${feedback}`, 'bci-feedback');
@@ -2074,12 +2095,17 @@
         }
 
         function generateAIResponse(responseType) {
-            const responses = {
-                'defensive': "I can see you're getting defensive. That's exactly what I mean.",
-                'empathetic': "Thank you for acknowledging that. I appreciate you really listening.",
-                'neutral': "Well, like when I try to tell you about my day and you're distracted..."
+            const aiPartnerResponses = {
+                'empathetic': "Thank you for acknowledging that. I appreciate you really listening to me.",
+                'neutral': "Well, like when I try to tell you about my day and you're looking at your phone...",
+                'defensive': "I can see you're getting defensive. That's exactly what I mean - you're not really hearing me.",
+                'curious': "I appreciate you asking. Maybe if we could have focused conversations without distractions, and you could ask follow-up questions to show you're engaged.",
+                'validating': "It really helps when you acknowledge my feelings like that. I feel more connected when you show that this matters to you too.",
+                'solution-focused': "I like that you want to work on this together. Maybe we could set aside specific time to talk without phones or other distractions."
             };
-            addTrainingMessage(responses[responseType], 'ai');
+            
+            const response = aiPartnerResponses[responseType] || "I'm glad we're talking about this. It helps me feel more connected to you.";
+            addTrainingMessage(response, 'ai');
         }
 
         function addTrainingMessage(text, type) {
@@ -2119,18 +2145,38 @@
         }
 
         function updateTrainingBCI() {
-            document.getElementById('training-stress').textContent = Math.round(trainingData.stress);
-            document.getElementById('training-empathy').textContent = Math.round(trainingData.empathy);
-            document.getElementById('training-regulation').textContent = Math.round(trainingData.regulation);
-            document.getElementById('pathway-count').textContent = trainingData.pathways;
+            // Ensure trainingData has valid values
+            if (!trainingData || typeof trainingData !== 'object') {
+                trainingData = { stress: 45, empathy: 65, regulation: 78, pathways: 0, exchanges: 0 };
+            }
             
-            const insights = [
-                "Analyzing prefrontal cortex activity",
-                "Monitoring mirror neuron engagement", 
-                "Tracking amygdala reactivity levels",
-                "Measuring neural pathway formation"
-            ];
-            document.getElementById('training-insight').textContent = insights[Math.floor(Math.random() * insights.length)];
+            // Validate and set default values for any invalid numbers
+            const stress = (typeof trainingData.stress === 'number' && !isNaN(trainingData.stress)) ? trainingData.stress : 45;
+            const empathy = (typeof trainingData.empathy === 'number' && !isNaN(trainingData.empathy)) ? trainingData.empathy : 65;
+            const regulation = (typeof trainingData.regulation === 'number' && !isNaN(trainingData.regulation)) ? trainingData.regulation : 78;
+            const pathways = (typeof trainingData.pathways === 'number' && !isNaN(trainingData.pathways)) ? trainingData.pathways : 0;
+            
+            // Update DOM elements with error checking
+            const stressEl = document.getElementById('training-stress');
+            const empathyEl = document.getElementById('training-empathy');
+            const regulationEl = document.getElementById('training-regulation');
+            const pathwayEl = document.getElementById('pathway-count');
+            const insightEl = document.getElementById('training-insight');
+            
+            if (stressEl) stressEl.textContent = Math.round(stress);
+            if (empathyEl) empathyEl.textContent = Math.round(empathy);
+            if (regulationEl) regulationEl.textContent = Math.round(regulation);
+            if (pathwayEl) pathwayEl.textContent = pathways;
+            
+            if (insightEl) {
+                const insights = [
+                    "Analyzing prefrontal cortex activity",
+                    "Monitoring mirror neuron engagement", 
+                    "Tracking amygdala reactivity levels",
+                    "Measuring neural pathway formation"
+                ];
+                insightEl.textContent = insights[Math.floor(Math.random() * insights.length)];
+            }
         }
 
         function completeTraining() {
@@ -2144,12 +2190,44 @@
             showScreen('results-screen');
             updateProgress(4);
             
-            const stressReduction = Math.round(45 - trainingData.stress);
-            const empathyIncrease = Math.round(trainingData.empathy - 65);
+            // Ensure trainingData is valid and has fallback values
+            validateTrainingData();
             
-            document.getElementById('result-pathways').textContent = `+${trainingData.pathways}`;
+            // Calculate results with NaN protection
+            const finalStress = Math.max(10, Math.min(100, trainingData.stress || 45));
+            const finalEmpathy = Math.max(20, Math.min(100, trainingData.empathy || 65));
+            const finalPathways = Math.max(0, trainingData.pathways || 0);
+            
+            const stressReduction = Math.round(Math.abs(45 - finalStress));
+            const empathyIncrease = Math.round(Math.abs(finalEmpathy - 65));
+            
+            // Set results with guaranteed valid values
+            document.getElementById('result-pathways').textContent = `+${finalPathways}`;
             document.getElementById('result-stress').textContent = `-${stressReduction}%`;
             document.getElementById('result-empathy').textContent = `+${empathyIncrease}%`;
+            
+            console.log('Final results:', { finalStress, finalEmpathy, finalPathways, stressReduction, empathyIncrease });
+        }
+        
+        // Validate and fix trainingData to prevent NaN issues
+        function validateTrainingData() {
+            if (!trainingData || typeof trainingData !== 'object') {
+                trainingData = {
+                    stress: 45,
+                    empathy: 65,
+                    regulation: 78,
+                    pathways: 0,
+                    exchanges: 0
+                };
+                return;
+            }
+            
+            // Fix any NaN or invalid values
+            trainingData.stress = isNaN(trainingData.stress) ? 45 : Math.max(10, Math.min(100, trainingData.stress));
+            trainingData.empathy = isNaN(trainingData.empathy) ? 65 : Math.max(20, Math.min(100, trainingData.empathy));
+            trainingData.regulation = isNaN(trainingData.regulation) ? 78 : Math.max(30, Math.min(100, trainingData.regulation));
+            trainingData.pathways = isNaN(trainingData.pathways) ? 0 : Math.max(0, trainingData.pathways);
+            trainingData.exchanges = isNaN(trainingData.exchanges) ? 0 : Math.max(0, trainingData.exchanges);
         }
 
         function downloadReport() {
